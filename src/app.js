@@ -65,11 +65,12 @@ const css = `
 :root{color-scheme:light;--ink:#182331;--muted:#697786;--line:#e4eaf0;--paper:#fff;--wash:#f5f8fb;--green:#247653;--green-light:#e7f3ed;--serif:Georgia,'Times New Roman',serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 var(--sans)}a{color:inherit;text-decoration:none}a:hover{color:var(--green)}button,input,textarea,select{font:inherit}button,.button{cursor:pointer;border:0;border-radius:8px;background:var(--green);color:#fff;padding:11px 17px;font-weight:650}button:hover,.button:hover{background:#195d40;color:#fff}button.secondary,.button.secondary{background:#edf2f5;color:var(--ink)}:focus-visible{outline:3px solid #7bb79a;outline-offset:3px}
 .wrap{width:min(1080px,calc(100% - 40px));margin:auto}.top{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.brand{font:700 23px var(--serif);letter-spacing:-.6px}.brand span{color:var(--green)}.nav{display:flex;gap:24px;align-items:center;color:var(--muted);font-size:14px}.hero{padding:84px 0 58px;max-width:760px}.hero h1{font:500 clamp(42px,7vw,76px)/1.06 var(--serif);letter-spacing:-2.7px;margin:12px 0 20px}.hero p{color:var(--muted);font-size:18px;max-width:590px;margin:0}.eyebrow{color:var(--green);font-size:13px;font-weight:700}.toolbar{padding:20px 0 28px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between}.search{display:flex;gap:8px}.search input{width:min(300px,58vw)}input,textarea,select{padding:11px 13px;border:1px solid #d5dee6;border-radius:7px;background:#fff;color:var(--ink);width:100%}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding-bottom:84px}.card{min-width:0}.cover{height:205px;background:linear-gradient(135deg,#e5f1eb,#f1f5f8);border-radius:9px;overflow:hidden;margin-bottom:18px}.cover img{width:100%;height:100%;object-fit:cover}.card time,.meta{color:var(--muted);font-size:13px}.card h2{font:500 25px/1.23 var(--serif);letter-spacing:-.4px;margin:8px 0}.card p{font-size:14px;color:var(--muted);margin:8px 0}.read{font-size:14px;color:var(--green);font-weight:650}.empty{padding:40px 0;color:var(--muted)}footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px}
-.article{max-width:740px;margin:0 auto;padding:68px 0 92px}.article h1{font:500 clamp(42px,6vw,66px)/1.08 var(--serif);letter-spacing:-2px;margin:10px 0 18px}.article .dek{font:20px/1.55 var(--serif);color:var(--muted);margin:0 0 30px}.article-cover{width:100%;max-height:460px;object-fit:cover;border-radius:10px;margin:4px 0 28px}.prose{font:19px/1.85 var(--serif)}.prose h2{font:500 32px/1.2 var(--serif);margin:42px 0 12px}.prose p{margin:0 0 24px}.prose blockquote{margin:34px 0;padding:4px 0 4px 22px;border-left:3px solid var(--green);font-size:23px;color:#3c4d59}.prose hr{border:0;border-top:1px solid var(--line);margin:38px 0}.prose pre{white-space:pre-wrap;background:var(--wash);padding:18px;border-radius:8px;font:15px/1.6 ui-monospace,monospace}.prose figure{margin:28px 0}.prose img{max-width:100%;border-radius:8px}.prose li{padding:4px 0}
+.article{max-width:740px;margin:0 auto;padding:68px 20px 92px}.article h1{font:500 clamp(42px,6vw,66px)/1.08 var(--serif);letter-spacing:-2px;margin:10px 0 18px}.article .dek{font:20px/1.55 var(--serif);color:var(--muted);margin:0 0 30px}.article-cover{width:100%;max-height:460px;object-fit:cover;border-radius:10px;margin:4px 0 28px}.prose{font:19px/1.85 var(--serif)}.prose h2{font:500 32px/1.2 var(--serif);margin:42px 0 12px}.prose p{margin:0 0 24px}.prose blockquote{margin:34px 0;padding:4px 0 4px 22px;border-left:3px solid var(--green);font-size:23px;color:#3c4d59}.prose hr{border:0;border-top:1px solid var(--line);margin:38px 0}.prose pre{white-space:pre-wrap;background:var(--wash);padding:18px;border-radius:8px;font:15px/1.6 ui-monospace,monospace}.prose figure{margin:28px 0}.prose img{max-width:100%;border-radius:8px}.prose li{padding:4px 0}
+.comments{border-top:1px solid var(--line);margin-top:52px;padding-top:34px}.comments h2{font:500 28px/1.25 var(--serif);letter-spacing:-.4px;margin:0 0 20px}.comment-form .field{margin:0 0 14px}.comment-form label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}.comment-form textarea{min-height:120px;resize:vertical}.comment-form button{margin-top:4px}.comment-list{list-style:none;margin:0 0 8px;padding:0}.comment-list li{border-top:1px solid var(--line);padding:18px 0}.comment-list li:first-child{border-top:0}.comment-list .who{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}.comment-list .who strong{font:650 15px var(--sans)}.comment-list .who time{color:var(--muted);font-size:13px}.comment-list p{margin:0;font:16px/1.7 var(--sans);white-space:pre-wrap;overflow-wrap:anywhere}.comment-empty{color:var(--muted);font-size:14px}.comment-error{border:1px solid #e6c9c6;background:#fbf1f0;border-radius:8px;padding:14px 16px;margin:0 0 20px;color:#8c3a34}.comment-error ul{margin:8px 0 0;padding-left:20px}
 .admin-shell{min-height:100vh;background:var(--wash)}.admin-header{background:#fff;border-bottom:1px solid var(--line);padding:16px 0}.admin-main{padding:36px 0}.admin-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.admin-title h1{font:500 36px var(--serif);margin:0}.table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}.table th,.table td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}.table th{font-size:12px;color:var(--muted);font-weight:650}.table td{font-size:14px}.pill{background:#edf2f5;border-radius:20px;padding:3px 9px;font-size:12px}.pill.published{background:var(--green-light);color:var(--green)}.actions{display:flex;gap:8px}.actions a,.actions button{padding:7px 10px;font-size:13px}.login{width:min(430px,calc(100% - 36px));margin:10vh auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:34px}.login h1{font:500 34px var(--serif);margin:0 0 8px}.login p{color:var(--muted);margin:0 0 24px}.login label{display:block;font-size:13px;font-weight:650;margin-bottom:8px}.login button{width:100%;margin-top:16px}.error{color:#a13b35;font-size:14px;margin-top:12px}
 .editor{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px}.panel{background:white;border:1px solid var(--line);border-radius:9px;padding:20px;margin-bottom:16px}.field{margin:0 0 16px}.field label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}.field textarea{min-height:90px;resize:vertical}.title-input{font:500 34px/1.2 var(--serif);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 0;margin-bottom:18px}.block{border:1px solid var(--line);padding:14px;border-radius:8px;margin:10px 0;background:#fff}.block-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.block-actions{display:flex;gap:5px}.block-actions button{padding:5px 8px;font-size:12px}.block textarea{min-height:75px}.block select{width:auto}.preview{padding:12px;background:var(--wash);border-radius:7px}.preview .prose{font-size:16px}
 @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr);gap:24px 16px}.cover{height:170px}.editor{grid-template-columns:1fr}.hero{padding:58px 0 44px}.toolbar{align-items:flex-start;flex-direction:column}.table th:nth-child(3),.table td:nth-child(3){display:none}.admin-title{align-items:flex-start;gap:14px;flex-direction:column}}
-@media(max-width:480px){.wrap{width:calc(100% - 32px)}.grid{grid-template-columns:1fr}.cover{height:220px}.nav{gap:14px}.article{padding:48px 0 70px}.article h1{letter-spacing:-1.4px}.prose{font-size:18px}.table th,.table td{padding:11px 9px}.search{width:100%}.search input{flex:1;min-width:0}}
+@media(max-width:480px){.wrap{width:calc(100% - 32px)}.grid{grid-template-columns:1fr}.cover{height:220px}.nav{gap:14px}.article{padding:48px 20px 70px}.article h1{letter-spacing:-1.4px}.prose{font-size:18px}.table th,.table td{padding:11px 9px}.search{width:100%}.search input{flex:1;min-width:0}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 `;
 
@@ -83,20 +84,38 @@ function postCard(p) {
   return `<article class="card"><a href="/p/${encodeURIComponent(p.slug)}"><div class="cover">${p.featured_image_url ? `<img src="${escapeHtml(p.featured_image_url)}" alt="" loading="lazy">` : ""}</div><time datetime="${escapeHtml(p.created_at)}">${dateText(p.created_at)}</time><h2>${escapeHtml(p.title)}</h2><p>${escapeHtml(p.excerpt || "")}</p><span class="read">Baca tulisan</span></a></article>`;
 }
 
+function articlePage(post, comments = [], commentError = "", values = {}) {
+  const title = post.seo_title || post.title, description = post.seo_description || post.excerpt || "";
+  const body = `${header}<main class="article"><a class="eyebrow" href="/">← Semua tulisan</a><h1>${escapeHtml(post.title)}</h1><p class="dek">${escapeHtml(post.excerpt || "")}</p><time class="meta" datetime="${escapeHtml(post.created_at)}">${dateText(post.created_at)}</time>${post.featured_image_url ? `<img class="article-cover" src="${escapeHtml(post.featured_image_url)}" alt="">` : ""}<div class="prose">${renderBlocks(blocksOf(post))}</div>${commentsSection(post, comments, commentError, values)}</main>${footer}`;
+  const extra = `${post.featured_image_url ? `<meta property="og:image" content="${escapeHtml(post.featured_image_url)}">` : ""}<meta property="og:type" content="article">`;
+  return layout(title, body, description, extra);
+}
+
 function memoryDB(posts = []) {
   const rows = posts.map(p => ({ ...p }));
+  const comments = [];
   return {
     prepare(sql) {
       let args = [];
       const api = {
         bind(...values) { args = values; return api; },
-        async all() { return { results: sql.includes("WHERE status") ? rows.filter(p => p.status === "published") : [...rows] }; },
+        async all() {
+          if (sql.includes("FROM comments")) {
+            return { results: comments.filter(c => c.post_id === Number(args[0])).sort((a, b) => a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : a.id - b.id) };
+          }
+          return { results: sql.includes("WHERE status") ? rows.filter(p => p.status === "published") : [...rows] };
+        },
         async first() {
           if (sql.includes("WHERE slug")) return rows.find(p => p.slug === args[0] && (!sql.includes("status =") || p.status === "published")) || null;
           if (sql.includes("WHERE id")) return rows.find(p => p.id === Number(args[0])) || null;
           return null;
         },
         async run() {
+          if (sql.startsWith("INSERT") && sql.includes("INTO comments")) {
+            const [post_id, name, body, created_at] = args;
+            comments.push({ id: comments.length ? Math.max(...comments.map(c => c.id)) + 1 : 1, post_id: Number(post_id), name, body, created_at });
+            return { success: true };
+          }
           if (sql.startsWith("INSERT")) {
             const [slug, title, content_json, excerpt, status, featured_image_url, seo_title, seo_description, created_at, updated_at] = args;
             const current = rows.find(p => p.id === Number(args[10]));
@@ -119,6 +138,18 @@ async function readPosts(db, published = false) {
   return result.results || [];
 }
 function blocksOf(post) { try { return JSON.parse(post.content_json || "[]"); } catch { return []; } }
+async function readComments(db, postId) {
+  const result = await db.prepare("SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC, id ASC").bind(postId).all();
+  return result.results || [];
+}
+function commentsSection(post, comments, error = "", values = { name: "", body: "" }) {
+  const slug = encodeURIComponent(post.slug);
+  const list = comments.length
+    ? `<ol class="comment-list">${comments.map(c => `<li><div class="who"><strong>${escapeHtml(c.name)}</strong><time datetime="${escapeHtml(c.created_at)}">${escapeHtml(dateText(c.created_at))}</time></div><p>${escapeHtml(c.body)}</p></li>`).join("")}</ol>`
+    : `<p class="comment-empty">Belum ada komentar. Jadi yang pertama menulis.</p>`;
+  const errorBox = error ? `<div class="comment-error" role="alert"><strong>Komentar belum bisa dikirim.</strong><ul><li>${escapeHtml(error)}</li></ul></div>` : "";
+  return `<section class="comments" id="komentar"><h2>Komentar</h2>${list}${errorBox}<form class="comment-form" id="comment-form" method="post" action="/p/${slug}/comments"><div class="field"><label for="comment-name">Nama</label><input id="comment-name" name="name" type="text" maxlength="80" value="${escapeHtml(values.name)}" autocomplete="name" required></div><div class="field"><label for="comment-body">Komentar</label><textarea id="comment-body" name="body" maxlength="2000" required>${escapeHtml(values.body)}</textarea></div><button id="comment-submit" name="comment_submit" type="submit">Kirim komentar</button></form></section>`;
+}
 
 async function sign(value, secret) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -218,12 +249,29 @@ export function createApp(env = {}) {
       return html(layout("nazuaf — Catatan yang tumbuh pelan-pelan", body));
     }
     if (path.startsWith("/p/")) {
-      const post = await db.prepare("SELECT * FROM posts WHERE slug = ? AND status = 'published'").bind(path.slice(3)).first();
+      const parts = path.slice(3).split("/").filter((part, i, all) => part !== "" || i < all.length - 1);
+      const slug = parts[0];
+      const isCommentSubmit = parts[1] === "comments";
+      if (parts.length > 2 || (parts.length > 1 && !isCommentSubmit)) return html(layout("Halaman tidak ditemukan · nazuaf", `${header}<main class="article"><span class="eyebrow">404</span><h1>Halaman ini tidak ditemukan.</h1><a class="read" href="/">Kembali ke beranda</a></main>${footer}`), 404);
+      const post = await db.prepare("SELECT * FROM posts WHERE slug = ? AND status = 'published'").bind(slug).first();
       if (!post) return html(layout("Halaman tidak ditemukan · nazuaf", `${header}<main class="article"><span class="eyebrow">404</span><h1>Tulisan ini belum ada.</h1><p class="dek">Mungkin alamatnya berubah, atau tulisan ini masih disimpan sebagai draft.</p><a class="read" href="/">Kembali ke beranda</a></main>${footer}`), 404);
-      const title = post.seo_title || post.title, description = post.seo_description || post.excerpt || "";
-      const body = `${header}<main class="article"><a class="eyebrow" href="/">← Semua tulisan</a><h1>${escapeHtml(post.title)}</h1><p class="dek">${escapeHtml(post.excerpt || "")}</p><time class="meta" datetime="${escapeHtml(post.created_at)}">${dateText(post.created_at)}</time>${post.featured_image_url ? `<img class="article-cover" src="${escapeHtml(post.featured_image_url)}" alt="">` : ""}<div class="prose">${renderBlocks(blocksOf(post))}</div></main>${footer}`;
-      const extra = `${post.featured_image_url ? `<meta property="og:image" content="${escapeHtml(post.featured_image_url)}">` : ""}<meta property="og:type" content="article">`;
-      return html(layout(title, body, description, extra));
+      if (isCommentSubmit && request.method === "POST") {
+        const form = await request.formData();
+        const name = String(form.get("name") || "").trim(), body = String(form.get("body") || "").trim();
+        const errors = [];
+        if (!name) errors.push("Nama wajib diisi.");
+        else if (name.length > 80) errors.push("Nama maksimal 80 karakter.");
+        if (!body) errors.push("Isi komentar wajib diisi.");
+        else if (body.length > 2000) errors.push("Isi komentar maksimal 2000 karakter.");
+        if (!errors.length) {
+          await db.prepare("INSERT INTO comments (post_id, name, body, created_at) VALUES (?,?,?,?)")
+            .bind(post.id, name, body, new Date().toISOString()).run();
+          return redirect(`/p/${encodeURIComponent(post.slug)}`);
+        }
+        return html(articlePage(post, await readComments(db, post.id), errors.join(" "), { name, body }), 400);
+      }
+      if (isCommentSubmit) return redirect(`/p/${encodeURIComponent(post.slug)}`);
+      return html(articlePage(post, await readComments(db, post.id)));
     }
     return html(layout("Halaman tidak ditemukan · nazuaf", `${header}<main class="article"><span class="eyebrow">404</span><h1>Halaman ini tidak ditemukan.</h1><p class="dek">Coba kembali ke beranda untuk menemukan tulisan lainnya.</p><a class="read" href="/">Kembali ke beranda</a></main>${footer}`), 404);
   } };

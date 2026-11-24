@@ -85,6 +85,92 @@ test("admin forms give every control a unique id and name", async () => {
   assert.match(script, /id="block-'\+i\+'-kind" name="block-'\+i\+'-kind"/);
 });
 
+const formHeaders = { "Content-Type": "application/x-www-form-urlencoded" };
+
+test("article page renders a comment form with name and body fields", async () => {
+  const app = createApp();
+  const response = await app.fetch(new Request("http://local/p/belajar-melambat"));
+  assert.equal(response.status, 200);
+  const page = await response.text();
+  assert.match(page, /<form[^>]+action="\/p\/belajar-melambat\/comments"/);
+  assert.match(page, /id="comment-name"[^>]*name="name"/);
+  assert.match(page, /id="comment-body"[^>]*name="body"/);
+  assert.match(page, /id="comment-submit"[^>]*type="submit"/);
+});
+
+test("a valid comment redirects with 303 and shows up on the article page", async () => {
+  const app = createApp();
+  const posted = await app.fetch(new Request("http://local/p/belajar-melambat/comments", {
+    method: "POST", headers: formHeaders,
+    body: new URLSearchParams({ name: "Rani", body: "Tulisan yang menenangkan." }).toString()
+  }));
+  assert.equal(posted.status, 303);
+  assert.equal(posted.headers.get("location"), "/p/belajar-melambat");
+  const page = await (await app.fetch(new Request("http://local/p/belajar-melambat"))).text();
+  assert.match(page, /Rani/);
+  assert.match(page, /Tulisan yang menenangkan\./);
+
+  const missing = await app.fetch(new Request("http://local/p/tidak-ada-slug/comments", {
+    method: "POST", headers: formHeaders,
+    body: new URLSearchParams({ name: "Rani", body: "Halo" }).toString()
+  }));
+  assert.equal(missing.status, 404);
+});
+
+test("comment output escapes HTML markup", async () => {
+  const app = createApp();
+  const posted = await app.fetch(new Request("http://local/p/belajar-melambat/comments", {
+    method: "POST", headers: formHeaders,
+    body: new URLSearchParams({ name: "<script>alert(1)</script>", body: "<b>tebal</b><img src=x onerror=alert(2)>" }).toString()
+  }));
+  assert.equal(posted.status, 303);
+  const page = await (await app.fetch(new Request("http://local/p/belajar-melambat"))).text();
+  assert.doesNotMatch(page, /<script>alert\(1\)<\/script>/);
+  assert.doesNotMatch(page, /<b>tebal<\/b>/);
+  assert.doesNotMatch(page, /<img src=x onerror/);
+  assert.match(page, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.match(page, /&lt;b&gt;tebal&lt;\/b&gt;/);
+});
+
+test("comments with empty or oversized name/body are rejected and not stored", async () => {
+  const app = createApp();
+  const rejected = [
+    new URLSearchParams({ name: "", body: "isi-tidak-boleh-muncul-xyz" }),
+    new URLSearchParams({ name: "NamaUji", body: "   " }),
+    new URLSearchParams({ name: "NamaUji" }),
+    new URLSearchParams({ name: "n".repeat(81), body: "isi-tidak-boleh-muncul-xyz" }),
+    new URLSearchParams({ name: "NamaUji", body: "b".repeat(2001) })
+  ];
+  for (const payload of rejected) {
+    const body = typeof payload === "string" ? payload : payload.toString();
+    const response = await app.fetch(new Request("http://local/p/belajar-melambat/comments", {
+      method: "POST", headers: formHeaders, body
+    }));
+    assert.equal(response.status, 400, `expected 400 for ${body.slice(0, 40)}`);
+    assert.match(await response.text(), /komentar/i);
+  }
+  const page = await (await app.fetch(new Request("http://local/p/belajar-melambat"))).text();
+  assert.doesNotMatch(page, /isi-tidak-boleh-muncul-xyz/);
+});
+
+test("comments are listed in chronological order", async () => {
+  const app = createApp();
+  for (const body of ["Komentar pertama", "Komentar kedua", "Komentar ketiga"]) {
+    const response = await app.fetch(new Request("http://local/p/belajar-melambat/comments", {
+      method: "POST", headers: formHeaders,
+      body: new URLSearchParams({ name: "Pengunjung", body }).toString()
+    }));
+    assert.equal(response.status, 303);
+  }
+  const page = await (await app.fetch(new Request("http://local/p/belajar-melambat"))).text();
+  const first = page.indexOf("Komentar pertama");
+  const second = page.indexOf("Komentar kedua");
+  const third = page.indexOf("Komentar ketiga");
+  assert.ok(first >= 0, "first comment rendered");
+  assert.ok(second > first, "second comment after first");
+  assert.ok(third > second, "third comment after second");
+});
+
 test("admin login rejects wrong password and grants a signed session", async () => {
   const app = createApp({ ADMIN_PASSWORD: "test-secret", SESSION_SECRET: "session-secret" });
   const wrong = await app.fetch(new Request("http://local/admin/login", {
