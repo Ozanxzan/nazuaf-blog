@@ -195,6 +195,7 @@ export function createApp(env = {}) {
   const db = env.DB || memoryDB(seedPosts);
   const password = env.ADMIN_PASSWORD || "nazuaf-dev-2026";
   const secret = env.SESSION_SECRET || "local-session-secret-change-for-deployment";
+  const apiToken = env.BLOG_API_TOKEN || "";
   let initialized;
   async function initialize() {
     if (!env.DB) return;
@@ -222,8 +223,7 @@ export function createApp(env = {}) {
       return new Response(null, { status: 303, headers: { Location: "/admin", "Set-Cookie": `nazuaf_session=${payload}.${signature}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800;${secure}` } });
     }
     if (path === "/admin/logout") return new Response(null, { status: 303, headers: { Location: "/admin", "Set-Cookie": "nazuaf_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0" } });
-    if (path === "/admin/upload" && request.method === "POST") {
-      if (!(await validSession(request, secret))) return json({ error: "Sesi admin tidak ditemukan. Silakan masuk lebih dulu." }, 401, { Location: "/admin/login" });
+    async function handleImageUpload(request) {
       let form;
       try { form = await request.formData(); } catch { return json({ error: "Permintaan harus multipart/form-data dengan satu berkas gambar." }, 400); }
       const file = form.get("image");
@@ -241,6 +241,34 @@ export function createApp(env = {}) {
         return json({ error: "Gambar gagal disimpan ke R2. Coba lagi." }, 502);
       }
       return json({ url: `${R2_PUBLIC_URL}/${key}`, key });
+    }
+    function validApiToken(request) {
+      if (!apiToken) return false;
+      return (request.headers.get("Authorization") || "") === `Bearer ${apiToken}`;
+    }
+    if (path === "/api/upload" && request.method === "POST") {
+      if (!validApiToken(request)) return json({ error: "Token API tidak valid." }, 401);
+      return handleImageUpload(request);
+    }
+    if (path === "/api/posts" && request.method === "POST") {
+      if (!validApiToken(request)) return json({ error: "Token API tidak valid." }, 401);
+      let body;
+      try { body = await request.json(); } catch { return json({ error: "Body harus JSON." }, 400); }
+      const title = String(body.title || "").trim();
+      const slug = slugify(body.slug || title);
+      if (!title || !slug) return json({ error: "Judul dan slug wajib diisi." }, 400);
+      const blocks = Array.isArray(body.content) ? body.content : (Array.isArray(body.blocks) ? body.blocks : null);
+      if (!blocks) return json({ error: "Isi tulisan wajib berupa array blok." }, 400);
+      const now = new Date().toISOString();
+      const status = body.status === "published" ? "published" : "draft";
+      await db.prepare("INSERT INTO posts (slug,title,content_json,excerpt,status,featured_image_url,seo_title,seo_description,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)")
+        .bind(slug, title, JSON.stringify(blocks), String(body.excerpt || ""), status, String(body.featured_image_url || ""), String(body.seo_title || ""), String(body.seo_description || ""), now, now).run();
+      const created = await db.prepare("SELECT id FROM posts WHERE slug = ?").bind(slug).first();
+      return json({ id: created?.id ?? null, slug, url: `/p/${slug}`, status }, 201);
+    }
+    if (path === "/admin/upload" && request.method === "POST") {
+      if (!(await validSession(request, secret))) return json({ error: "Sesi admin tidak ditemukan. Silakan masuk lebih dulu." }, 401, { Location: "/admin/login" });
+      return handleImageUpload(request);
     }
     if (path.startsWith("/admin")) {
       if (!(await validSession(request, secret))) return html(loginPage());

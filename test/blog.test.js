@@ -322,3 +322,59 @@ test("editor exposes an upload button for image blocks and the featured image", 
   assert.match(script, /\.append\('image',/);
   assert.match(script, /10\*1024\*1024/);
 });
+
+test("API posting menolak token yang salah atau tidak ada", async () => {
+  const app = createApp({ BLOG_API_TOKEN: "token-rahasia" });
+  const noToken = await app.fetch(new Request("http://local/api/posts", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "Tes", content: [{ type: "paragraph", text: "isi" }] })
+  }));
+  assert.equal(noToken.status, 401);
+  const wrong = await app.fetch(new Request("http://local/api/posts", {
+    method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer salah" },
+    body: JSON.stringify({ title: "Tes", content: [{ type: "paragraph", text: "isi" }] })
+  }));
+  assert.equal(wrong.status, 401);
+});
+
+test("API posting dengan token benar membuat tulisan yang bisa dibaca publik", async () => {
+  const app = createApp({ BLOG_API_TOKEN: "token-rahasia" });
+  const created = await app.fetch(new Request("http://local/api/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer token-rahasia" },
+    body: JSON.stringify({
+      title: "Catatan Harian Uji API",
+      excerpt: "Ringkasan uji.",
+      content: [{ type: "paragraph", text: "Isi catatan harian yang ditulis lewat API." }],
+      featured_image_url: "https://example.com/gambar.jpg",
+      status: "published"
+    })
+  }));
+  assert.equal(created.status, 201);
+  const data = await created.json();
+  assert.equal(data.slug, "catatan-harian-uji-api");
+  assert.equal(data.url, "/p/catatan-harian-uji-api");
+  assert.ok(data.id);
+  const page = await (await app.fetch(new Request("http://local/p/catatan-harian-uji-api"))).text();
+  assert.match(page, /Catatan Harian Uji API/);
+  assert.match(page, /Isi catatan harian yang ditulis lewat API/);
+});
+
+test("API posting menolak body tanpa judul atau tanpa blok isi", async () => {
+  const app = createApp({ BLOG_API_TOKEN: "token-rahasia" });
+  const headers = { "Content-Type": "application/json", Authorization: "Bearer token-rahasia" };
+  const noTitle = await app.fetch(new Request("http://local/api/posts", { method: "POST", headers, body: JSON.stringify({ content: [] }) }));
+  assert.equal(noTitle.status, 400);
+  const noBlocks = await app.fetch(new Request("http://local/api/posts", { method: "POST", headers, body: JSON.stringify({ title: "Ada judul" }) }));
+  assert.equal(noBlocks.status, 400);
+});
+
+test("API upload tanpa binding R2 mengembalikan 503 setelah token lolos", async () => {
+  const app = createApp({ BLOG_API_TOKEN: "token-rahasia" });
+  const fd = new FormData();
+  fd.append("image", new File([new Uint8Array([1, 2, 3])], "tes.png", { type: "image/png" }));
+  const response = await app.fetch(new Request("http://local/api/upload", {
+    method: "POST", headers: { Authorization: "Bearer token-rahasia" }, body: fd
+  }));
+  assert.equal(response.status, 503);
+});
