@@ -1,0 +1,2 @@
+ADMIN_PASSWORD=change-this-local-password
+SESSION_SECRET=change-this-local-session-secret

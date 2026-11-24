@@ -1,0 +1,9 @@
+name = "nazuaf-blog"
+main = "src/app.js"
+compatibility_date = "2026-11-24"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nazuaf-blog"
+database_id = "2209e54d-5430-49ce-a556-d8a06b348cf4"
+migrations_dir = "migrations"
