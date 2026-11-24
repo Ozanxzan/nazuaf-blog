@@ -185,3 +185,140 @@ test("admin login rejects wrong password and grants a signed session", async () 
   assert.equal(right.status, 303);
   assert.match(right.headers.get("set-cookie"), /HttpOnly/);
 });
+// --- Upload gambar ke R2 ---------------------------------------------------
+
+const PUB = "https://pub-239053dedacb4db192cfd42491f1b7fb.r2.dev";
+
+function fakeImages() {
+  const puts = [];
+  return {
+    puts,
+    async put(key, value, options) { puts.push({ key, value, options }); return {}; },
+    async get() { return null; },
+    async delete() { return {}; }
+  };
+}
+
+async function adminCookie(app) {
+  const login = await app.fetch(new Request("http://local/admin/login", {
+    method: "POST", headers: formHeaders,
+    body: new URLSearchParams({ password: "test-password" }).toString()
+  }));
+  return login.headers.get("set-cookie").split(";")[0];
+}
+
+function postUpload(app, cookie, file, field = "image") {
+  const form = new FormData();
+  if (file) form.append(field, file);
+  return app.fetch(new Request("http://local/admin/upload", {
+    method: "POST",
+    headers: cookie ? { Cookie: cookie } : {},
+    body: form
+  }));
+}
+
+const jpegFile = (name = "foto pantai.JPG", bytes = 1024) =>
+  new File([new Uint8Array(bytes)], name, { type: "image/jpeg" });
+
+test("upload route requires an admin session and points at the login page", async () => {
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session", IMAGES: fakeImages() });
+  const response = await postUpload(app, null, jpegFile());
+  assert.equal(response.status, 401);
+  assert.match(response.headers.get("content-type"), /application\/json/);
+  assert.equal(response.headers.get("location"), "/admin/login");
+  const body = await response.json();
+  assert.match(body.error, /masuk|login|sesi/i);
+
+  const forged = await postUpload(app, "nazuaf_session=palsu.tanda", jpegFile());
+  assert.equal(forged.status, 401);
+});
+
+test("upload stores the image under images/<yyyy-mm>/<uuid>-<nama-aman> and returns the public URL", async () => {
+  const images = fakeImages();
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session", IMAGES: images });
+  const cookie = await adminCookie(app);
+  const response = await postUpload(app, cookie, jpegFile("foto pantai.JPG"));
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type"), /application\/json/);
+  const { url } = await response.json();
+
+  const now = new Date();
+  const month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  assert.match(url, new RegExp(`^${PUB.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/images/${month}/[0-9a-f-]{36}-foto-pantai\\.jpg$`));
+
+  assert.equal(images.puts.length, 1);
+  const [put] = images.puts;
+  assert.equal(put.key, url.slice(PUB.length + 1));
+  assert.equal(put.options.httpMetadata.contentType, "image/jpeg");
+});
+
+test("upload accepts exactly 10 MB and rejects anything larger", async () => {
+  const images = fakeImages();
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session", IMAGES: images });
+  const cookie = await adminCookie(app);
+
+  const atLimit = await postUpload(app, cookie, jpegFile("batas.jpg", 10 * 1024 * 1024));
+  assert.equal(atLimit.status, 200);
+
+  const tooBig = await postUpload(app, cookie, jpegFile("kebesaran.jpg", 10 * 1024 * 1024 + 1));
+  assert.equal(tooBig.status, 400);
+  assert.match((await tooBig.json()).error, /10 ?MB/i);
+
+  const tiny = await postUpload(app, cookie, jpegFile("kecil.jpg", 1));
+  assert.equal(tiny.status, 200);
+  assert.equal(images.puts.length, 2);
+});
+
+test("upload rejects unsupported types, missing files and non-ASCII names are made safe", async () => {
+  const images = fakeImages();
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session", IMAGES: images });
+  const cookie = await adminCookie(app);
+
+  for (const file of [
+    new File(["halo"], "catatan.txt", { type: "text/plain" }),
+    new File(["<svg/>"], "vektor.svg", { type: "image/svg+xml" }),
+    new File(["x"], "polos.bin", { type: "" })
+  ]) {
+    const response = await postUpload(app, cookie, file);
+    assert.equal(response.status, 400, `expected 400 for ${file.type || "tanpa tipe"}`);
+    assert.match((await response.json()).error, /jpeg|png|webp|gif/i);
+  }
+
+  const missing = await postUpload(app, cookie, null);
+  assert.equal(missing.status, 400);
+  assert.match((await missing.json()).error, /gambar|image/i);
+
+  const wrongField = await postUpload(app, cookie, jpegFile("salah.jpg"), "berkas");
+  assert.equal(wrongField.status, 400);
+
+  const sneaky = await postUpload(app, cookie, jpegFile("../../Nama Aneh!!.JPG"));
+  assert.equal(sneaky.status, 200);
+  const key = images.puts.at(-1).key;
+  assert.match(key, /^images\/\d{4}-\d{2}\/[0-9a-f-]{36}-nama-aneh\.jpg$/);
+  assert.doesNotMatch(key, /\.\./);
+});
+
+test("upload fails cleanly when the R2 binding is missing in local dev", async () => {
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session" });
+  const cookie = await adminCookie(app);
+  const response = await postUpload(app, cookie, jpegFile());
+  assert.equal(response.status, 503);
+  assert.match(response.headers.get("content-type"), /application\/json/);
+  assert.match((await response.json()).error, /R2/i);
+});
+
+test("editor exposes an upload button for image blocks and the featured image", async () => {
+  const app = createApp({ ADMIN_PASSWORD: "test-password", SESSION_SECRET: "test-session" });
+  const cookie = await adminCookie(app);
+  const page = await (await app.fetch(new Request("http://local/admin/posts/new", { headers: { Cookie: cookie } }))).text();
+  assert.match(page, /id="featured-image-upload"[^>]*name="featured_image_upload"[^>]*>Upload gambar</);
+  assert.match(page, /id="featured-image-file"[^>]*name="featured_image_file"[^>]*type="file"/);
+  assert.match(page, /id="featured-image-preview"/);
+
+  const script = await (await app.fetch(new Request("http://local/admin/editor.js"))).text();
+  assert.match(script, /Upload gambar/);
+  assert.match(script, /'\/admin\/upload'/);
+  assert.match(script, /new FormData\(\)/);
+  assert.match(script, /\.append\('image',/);
+  assert.match(script, /10\*1024\*1024/);
+});
