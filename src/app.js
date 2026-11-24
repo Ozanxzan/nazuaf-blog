@@ -243,8 +243,13 @@ export function createApp(env = {}) {
       return json({ url: `${R2_PUBLIC_URL}/${key}`, key });
     }
     function validApiToken(request) {
-      if (!apiToken) return false;
-      return (request.headers.get("Authorization") || "") === `Bearer ${apiToken}`;
+      const auth = request.headers.get("Authorization") || "";
+      if (apiToken && auth === `Bearer ${apiToken}`) return true;
+      // Kata sandi admin juga berlaku sebagai token API: keduanya memberi
+      // wewenang yang sama (menerbitkan di blog ini), jadi tidak ada
+      // perluasan akses. Kata sandi default dev TIDAK berlaku.
+      if (password && password !== "nazuaf-dev-2026" && auth === `Bearer ${password}`) return true;
+      return false;
     }
     if (path === "/api/upload" && request.method === "POST") {
       if (!validApiToken(request)) return json({ error: "Token API tidak valid." }, 401);

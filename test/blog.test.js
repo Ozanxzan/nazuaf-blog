@@ -378,3 +378,20 @@ test("API upload tanpa binding R2 mengembalikan 503 setelah token lolos", async 
   }));
   assert.equal(response.status, 503);
 });
+
+test("API posting menerima kata sandi admin sebagai token, tapi bukan kata sandi default dev", async () => {
+  const app = createApp({ ADMIN_PASSWORD: "kata-sandi-asli", SESSION_SECRET: "sesi" });
+  const ok = await app.fetch(new Request("http://local/api/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer kata-sandi-asli" },
+    body: JSON.stringify({ title: "Lewat Kata Sandi", content: [{ type: "paragraph", text: "isi" }], status: "draft" })
+  }));
+  assert.equal(ok.status, 201);
+  const dev = createApp();
+  const noDev = await dev.fetch(new Request("http://local/api/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer nazuaf-dev-2026" },
+    body: JSON.stringify({ title: "Tidak boleh", content: [{ type: "paragraph", text: "isi" }] })
+  }));
+  assert.equal(noDev.status, 401);
+});
